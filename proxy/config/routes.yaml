@@ -1,0 +1,5 @@
+controllers:
+    resource:
+        path: ../src/Chat/Infrastructure/Controller/
+        namespace: App\Chat\Infrastructure\Controller
+    type: attribute
