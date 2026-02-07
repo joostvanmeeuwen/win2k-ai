@@ -2,6 +2,8 @@
 
 A retro AI chat application consisting of a Windows 2000 desktop client and a PHP proxy server that bridges legacy HTTP to modern LLM APIs.
 
+![Windows 2000 AI Client](screenshot.png)
+
 ## Architecture
 
 ```
