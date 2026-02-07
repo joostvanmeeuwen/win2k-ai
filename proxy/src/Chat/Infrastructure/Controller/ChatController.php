@@ -27,14 +27,12 @@ final readonly class ChatController
         $contentType = $request->headers->get('Content-Type', '');
         $accept = $request->headers->get('Accept', 'text/plain');
 
-        // Parse input based on Content-Type
         if (str_contains($contentType, 'application/json')) {
             $data = json_decode($request->getContent(), true) ?? [];
             $prompt = $data['prompt'] ?? '';
             $model = $data['model'] ?? '';
             $backInTime = (bool) ($data['back_in_time'] ?? false);
         } else {
-            // Default: form-urlencoded
             $prompt = $request->request->get('prompt', '');
             $model = $request->request->get('model', '');
             $backInTime = (bool) $request->request->get('back_in_time', false);
@@ -57,7 +55,6 @@ final readonly class ChatController
 
             $response = ($this->sendChatHandler)($command);
 
-            // Return based on Accept header
             if (str_contains($accept, 'application/json')) {
                 return new JsonResponse([
                     'response' => $response->response,
@@ -65,7 +62,6 @@ final readonly class ChatController
                 ]);
             }
 
-            // Default: plain text for Windows 2000
             return new Response($response->response, 200, [
                 'Content-Type' => 'text/plain; charset=utf-8',
             ]);
@@ -75,12 +71,24 @@ final readonly class ChatController
     }
 
     #[Route('/api/models', name: 'api_models', methods: ['GET'])]
-    public function models(): JsonResponse
+    public function models(Request $request): Response
     {
+        $accept = $request->headers->get('Accept', 'text/plain');
         $models = ($this->getModelsHandler)(new GetModelsQuery());
 
-        return new JsonResponse([
-            'models' => array_map(fn($model) => $model->toArray(), $models),
+        if (str_contains($accept, 'application/json')) {
+            return new JsonResponse([
+                'models' => array_map(fn($model) => $model->toArray(), $models),
+            ]);
+        }
+
+        $lines = array_map(
+            fn($model) => sprintf('%s|%s|%s', $model->id, $model->name, $model->provider),
+            $models
+        );
+
+        return new Response(implode("\n", $lines), 200, [
+            'Content-Type' => 'text/plain; charset=utf-8',
         ]);
     }
 

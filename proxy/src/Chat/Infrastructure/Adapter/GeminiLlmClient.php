@@ -23,32 +23,27 @@ final readonly class GeminiLlmClient implements LlmClientInterface
     {
         $url = sprintf(self::API_URL, $message->model) . '?key=' . $this->apiKey;
 
-        $contents = [];
+        $requestBody = [
+            'contents' => [
+                [
+                    'role' => 'user',
+                    'parts' => [['text' => $message->prompt]],
+                ],
+            ],
+        ];
 
         $systemPrompt = $message->getSystemPrompt();
         if ($systemPrompt !== null) {
-            $contents[] = [
-                'role' => 'user',
+            $requestBody['systemInstruction'] = [
                 'parts' => [['text' => $systemPrompt]],
             ];
-            $contents[] = [
-                'role' => 'model',
-                'parts' => [['text' => 'Begrepen! Ik ben nu een AI assistent in het jaar 2000.']],
-            ];
         }
-
-        $contents[] = [
-            'role' => 'user',
-            'parts' => [['text' => $message->prompt]],
-        ];
 
         $response = $this->httpClient->request('POST', $url, [
             'headers' => [
                 'Content-Type' => 'application/json',
             ],
-            'json' => [
-                'contents' => $contents,
-            ],
+            'json' => $requestBody,
         ]);
 
         $data = $response->toArray(false);
