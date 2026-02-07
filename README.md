@@ -28,10 +28,11 @@ A retro AI chat application consisting of a Windows 2000 desktop client and a PH
 ### Setup
 
 1. Clone the repository
-2. Configure API keys in `proxy/.env`:
-   ```
-   ANTHROPIC_API_KEY=sk-ant-api03-...
-   GOOGLE_API_KEY=AIza...
+2. Configure API keys:
+   ```bash
+   cd proxy
+   cp .env.example .env
+   # Edit .env and add your API keys
    ```
 3. Start the containers:
    ```bash
