@@ -46,17 +46,33 @@ A retro AI chat application consisting of a Windows 2000 desktop client and a PH
 
 Returns a list of available LLM models.
 
-**Request:**
+**Request (plain text response - default):**
 ```bash
 curl http://localhost:8080/api/models
+```
+
+**Response:**
+```
+claude-opus-4-6|Claude Opus 4.6|anthropic
+claude-sonnet-4-5-20250929|Claude Sonnet 4.5|anthropic
+claude-haiku-4-5-20251001|Claude Haiku 4.5|anthropic
+gemini-2.5-pro|Gemini 2.5 Pro|google
+gemini-2.5-flash|Gemini 2.5 Flash|google
+```
+
+Format: `id|name|provider` (one model per line)
+
+**Request (JSON response):**
+```bash
+curl -H "Accept: application/json" http://localhost:8080/api/models
 ```
 
 **Response:**
 ```json
 {
   "models": [
-    {"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4", "provider": "anthropic"},
-    {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "provider": "google"}
+    {"id": "claude-opus-4-6", "name": "Claude Opus 4.6", "provider": "anthropic"},
+    {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "provider": "google"}
   ]
 }
 ```
@@ -69,14 +85,14 @@ Send a prompt to an LLM and receive a response.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | prompt | string | Yes | The user's message |
-| model | string | Yes | Model ID (e.g., `claude-sonnet-4-20250514`) |
+| model | string | Yes | Model ID (e.g., `claude-sonnet-4-5-20250929`) |
 | back_in_time | bool | No | Enable "year 2000" mode (default: false) |
 
 **Request (form-urlencoded, plain text response):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
   -H "Accept: text/plain" \
-  -d "prompt=Hello, who are you?&model=claude-sonnet-4-20250514"
+  -d "prompt=Hello, who are you?&model=claude-sonnet-4-5-20250929"
 ```
 
 **Response:**
@@ -88,14 +104,14 @@ Hello! I'm Claude, an AI assistant made by Anthropic. How can I help you today?
 ```bash
 curl -X POST http://localhost:8080/api/chat \
   -H "Accept: application/json" \
-  -d "prompt=Hello&model=claude-sonnet-4-20250514"
+  -d "prompt=Hello&model=claude-sonnet-4-5-20250929"
 ```
 
 **Response:**
 ```json
 {
   "response": "Hello! How can I help you today?",
-  "model": "claude-sonnet-4-20250514"
+  "model": "claude-sonnet-4-5-20250929"
 }
 ```
 
@@ -104,14 +120,14 @@ curl -X POST http://localhost:8080/api/chat \
 curl -X POST http://localhost:8080/api/chat \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
-  -d '{"prompt": "Hello", "model": "claude-sonnet-4-20250514", "back_in_time": false}'
+  -d '{"prompt": "Hello", "model": "claude-sonnet-4-5-20250929", "back_in_time": false}'
 ```
 
 **Request (with "Back in Time" mode):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
   -H "Accept: text/plain" \
-  -d "prompt=What do you think of the iPhone?&model=claude-sonnet-4-20250514&back_in_time=1"
+  -d "prompt=What do you think of the iPhone?&model=claude-sonnet-4-5-20250929&back_in_time=1"
 ```
 
 When `back_in_time=1`, the LLM will roleplay as if it's the year 2000, with no knowledge of events or technology after December 31, 2000.
@@ -120,23 +136,12 @@ When `back_in_time=1`, the LLM will roleplay as if it's the year 2000, with no k
 
 **Anthropic Claude:**
 - `claude-opus-4-6` - Claude Opus 4.6
-- `claude-opus-4-5-20251101` - Claude Opus 4.5
 - `claude-sonnet-4-5-20250929` - Claude Sonnet 4.5
 - `claude-haiku-4-5-20251001` - Claude Haiku 4.5
-- `claude-opus-4-1-20250805` - Claude Opus 4.1
-- `claude-opus-4-20250514` - Claude Opus 4
-- `claude-sonnet-4-20250514` - Claude Sonnet 4
-- `claude-3-5-haiku-20241022` - Claude Haiku 3.5
-- `claude-3-haiku-20240307` - Claude Haiku 3
 
 **Google Gemini:**
-- `gemini-3-pro-preview` - Gemini 3 Pro Preview
-- `gemini-3-flash-preview` - Gemini 3 Flash Preview
 - `gemini-2.5-pro` - Gemini 2.5 Pro
 - `gemini-2.5-flash` - Gemini 2.5 Flash
-- `gemini-2.5-flash-lite` - Gemini 2.5 Flash-Lite
-- `gemini-2.0-flash` - Gemini 2.0 Flash
-- `gemini-2.0-flash-lite` - Gemini 2.0 Flash-Lite
 
 ---
 
