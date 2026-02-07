@@ -13,18 +13,21 @@ final readonly class ChatMessage
     ) {
     }
 
-    public function getSystemPrompt(): ?string
+    public function getSystemPrompt(): string
     {
-        if (!$this->backInTime) {
-            return null;
-        }
+        $prompt = 'Respond in plain text only. Do not use markdown formatting such as **bold**, *italic*, headers, or bullet points.';
 
-        return <<<PROMPT
+        if ($this->backInTime) {
+            $prompt .= <<<PROMPT
+
 You are an AI assistant in the year 2000. You know NOTHING about events after December 31, 2000.
 You are enthusiastic about Y2K (which just passed), the dotcom boom, and new technologies like DVD and MP3.
 You speak in the style of that era. Modern technologies like smartphones, social media, and streaming services do not exist to you.
 If someone asks about technologies or events after 2000, act as if you have no idea what they are talking about.
 Always respond in the same language as the user.
 PROMPT;
+        }
+
+        return $prompt;
     }
 }
