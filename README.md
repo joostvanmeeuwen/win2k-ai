@@ -147,12 +147,12 @@ When `back_in_time=1`, the LLM will roleplay as if it's the year 2000, with no k
 
 ## Client
 
-Windows 2000 desktop application (coming soon).
+Windows 2000 desktop application (C# .NET Framework 2.0).
 
 ### Requirements
 
 - Windows 2000 Professional
-- .NET Framework 1.1 or 2.0
+- .NET Framework 2.0
 - Microsoft Visual Studio 2005 (for development)
 
 ---
