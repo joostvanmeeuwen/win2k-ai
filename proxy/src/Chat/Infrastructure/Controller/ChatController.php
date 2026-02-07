@@ -13,12 +13,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final readonly class ChatController
 {
     public function __construct(
         private SendChatCommandHandler $sendChatHandler,
         private GetModelsQueryHandler $getModelsHandler,
+        private ValidatorInterface $validator,
     ) {
     }
 
@@ -27,12 +29,9 @@ final readonly class ChatController
     {
         $accept = $request->headers->get('Accept', 'text/plain');
 
-        if (empty($chatRequest->prompt)) {
-            return $this->errorResponse('Prompt is required', $accept, 400);
-        }
-
-        if (empty($chatRequest->model)) {
-            return $this->errorResponse('Model is required', $accept, 400);
+        $errors = $this->validator->validate($chatRequest);
+        if (count($errors) > 0) {
+            return $this->errorResponse((string) $errors->get(0)->getMessage(), $accept, 400);
         }
 
         try {
