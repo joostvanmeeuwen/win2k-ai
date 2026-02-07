@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Chat\Application\Query;
 
 use App\Chat\Domain\Model\LlmModel;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class GetModelsQueryHandler
 {
     /** @param array<array{id: string, name: string, provider: string}> $models */
     public function __construct(
+        #[Autowire(param: 'llm.models')]
         private array $models,
     ) {
     }

@@ -7,6 +7,7 @@ namespace App\Chat\Infrastructure\Adapter;
 use App\Chat\Domain\Model\ChatMessage;
 use App\Chat\Domain\Model\ChatResponse;
 use App\Chat\Domain\Llm\LlmClientInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ClaudeLlmClient implements LlmClientInterface
@@ -16,6 +17,7 @@ final readonly class ClaudeLlmClient implements LlmClientInterface
 
     public function __construct(
         private HttpClientInterface $httpClient,
+        #[Autowire(env: 'ANTHROPIC_API_KEY')]
         private string $apiKey,
     ) {
     }

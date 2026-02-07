@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Chat\Infrastructure\Adapter;
 
 use App\Chat\Domain\Llm\LlmClientInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final readonly class LlmClientResolver
 {
     /** @param iterable<LlmClientInterface> $clients */
     public function __construct(
+        #[AutowireIterator('app.llm_client')]
         private iterable $clients,
     ) {
     }
