@@ -6,7 +6,7 @@ namespace App\Chat\Application\Command;
 
 use App\Chat\Domain\Model\ChatMessage;
 use App\Chat\Domain\Model\ChatResponse;
-use App\Chat\Infrastructure\Adapter\LlmClientResolver;
+use App\Chat\Infrastructure\Llm\LlmClientResolver;
 
 final readonly class SendChatCommandHandler
 {

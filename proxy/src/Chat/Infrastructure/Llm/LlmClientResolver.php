@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Chat\Infrastructure\Adapter;
+namespace App\Chat\Infrastructure\Llm;
 
 use App\Chat\Domain\Llm\LlmClientInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
