@@ -8,6 +8,7 @@ use App\Chat\Application\Command\SendChatCommand;
 use App\Chat\Application\Command\SendChatCommandHandler;
 use App\Chat\Application\Query\GetModelsQuery;
 use App\Chat\Application\Query\GetModelsQueryHandler;
+use App\Chat\Infrastructure\ValueResolver\ChatRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,35 +23,23 @@ final readonly class ChatController
     }
 
     #[Route('/api/chat', name: 'api_chat', methods: ['POST'])]
-    public function chat(Request $request): Response
+    public function chat(ChatRequest $chatRequest, Request $request): Response
     {
-        $contentType = $request->headers->get('Content-Type', '');
         $accept = $request->headers->get('Accept', 'text/plain');
 
-        if (str_contains($contentType, 'application/json')) {
-            $data = json_decode($request->getContent(), true) ?? [];
-            $prompt = $data['prompt'] ?? '';
-            $model = $data['model'] ?? '';
-            $backInTime = (bool) ($data['back_in_time'] ?? false);
-        } else {
-            $prompt = $request->request->get('prompt', '');
-            $model = $request->request->get('model', '');
-            $backInTime = (bool) $request->request->get('back_in_time', false);
-        }
-
-        if (empty($prompt)) {
+        if (empty($chatRequest->prompt)) {
             return $this->errorResponse('Prompt is required', $accept, 400);
         }
 
-        if (empty($model)) {
+        if (empty($chatRequest->model)) {
             return $this->errorResponse('Model is required', $accept, 400);
         }
 
         try {
             $command = new SendChatCommand(
-                prompt: $prompt,
-                model: $model,
-                backInTime: $backInTime,
+                prompt: $chatRequest->prompt,
+                model: $chatRequest->model,
+                backInTime: $chatRequest->backInTime,
             );
 
             $response = ($this->sendChatHandler)($command);
