@@ -16,8 +16,9 @@ services:
         resource: '../src/Chat/Infrastructure/Controller/'
         tags: ['controller.service_arguments']
 
-    App\Chat\Domain\Llm\LlmClientInterface:
-        alias: App\Chat\Infrastructure\Adapter\LlmClientFactory
+    _instanceof:
+        App\Chat\Domain\Llm\LlmClientInterface:
+            tags: ['app.llm_client']
 
     App\Chat\Infrastructure\Adapter\ClaudeLlmClient:
         arguments:
@@ -27,11 +28,9 @@ services:
         arguments:
             $apiKey: '%env(GOOGLE_API_KEY)%'
 
-    App\Chat\Infrastructure\Adapter\LlmClientFactory:
+    App\Chat\Infrastructure\Adapter\LlmClientResolver:
         arguments:
-            $claudeClient: '@App\Chat\Infrastructure\Adapter\ClaudeLlmClient'
-            $geminiClient: '@App\Chat\Infrastructure\Adapter\GeminiLlmClient'
-            $models: '%llm.models%'
+            $clients: !tagged_iterator app.llm_client
 
     App\Chat\Application\Query\GetModelsQueryHandler:
         arguments:

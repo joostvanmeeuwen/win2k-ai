@@ -6,12 +6,12 @@ namespace App\Chat\Application\Command;
 
 use App\Chat\Domain\Model\ChatMessage;
 use App\Chat\Domain\Model\ChatResponse;
-use App\Chat\Domain\Llm\LlmClientInterface;
+use App\Chat\Infrastructure\Adapter\LlmClientResolver;
 
 final readonly class SendChatCommandHandler
 {
     public function __construct(
-        private LlmClientInterface $llmClient,
+        private LlmClientResolver $llmClientResolver,
     ) {
     }
 
@@ -23,6 +23,8 @@ final readonly class SendChatCommandHandler
             backInTime: $command->backInTime,
         );
 
-        return $this->llmClient->chat($message);
+        return $this->llmClientResolver
+            ->resolve($command->model)
+            ->chat($message);
     }
 }
