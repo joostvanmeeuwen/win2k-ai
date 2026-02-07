@@ -32,12 +32,9 @@ final readonly class GeminiLlmClient implements LlmClientInterface
             ],
         ];
 
-        $systemPrompt = $message->getSystemPrompt();
-        if ($systemPrompt !== null) {
-            $requestBody['systemInstruction'] = [
-                'parts' => [['text' => $systemPrompt]],
-            ];
-        }
+        $requestBody['systemInstruction'] = [
+            'parts' => [['text' => $message->getSystemPrompt()]],
+        ];
 
         $response = $this->httpClient->request('POST', $url, [
             'headers' => [

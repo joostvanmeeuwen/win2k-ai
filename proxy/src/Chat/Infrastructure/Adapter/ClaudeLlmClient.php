@@ -33,10 +33,7 @@ final readonly class ClaudeLlmClient implements LlmClientInterface
             ],
         ];
 
-        $systemPrompt = $message->getSystemPrompt();
-        if ($systemPrompt !== null) {
-            $requestBody['system'] = $systemPrompt;
-        }
+        $requestBody['system'] = $message->getSystemPrompt();
 
         $response = $this->httpClient->request('POST', self::API_URL, [
             'headers' => [
