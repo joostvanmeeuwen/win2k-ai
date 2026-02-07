@@ -155,8 +155,3 @@ Windows 2000 desktop application (C# .NET Framework 2.0).
 - .NET Framework 2.0
 - Microsoft Visual Studio 2005 (for development)
 
----
-
-## License
-
-MIT
