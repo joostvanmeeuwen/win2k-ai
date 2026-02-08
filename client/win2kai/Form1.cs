@@ -64,10 +64,12 @@ namespace win2kai
         {
             if (string.IsNullOrEmpty(txtInput.Text))
             {
+                MessageBox.Show("Please enter a prompt.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (cmbModels.SelectedItem == null)
             {
+                MessageBox.Show("Please select a model.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
