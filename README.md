@@ -47,27 +47,11 @@ A retro AI chat application consisting of a Windows 2000 desktop client and a PH
 
 #### GET /api/models
 
-Returns a list of available LLM models.
+Returns a list of available LLM models. Supports JSON and XML responses via the `Accept` header.
 
-**Request (plain text response - default):**
+**Request (JSON response - default):**
 ```bash
 curl http://localhost:8080/api/models
-```
-
-**Response:**
-```
-claude-opus-4-6|Claude Opus 4.6|anthropic
-claude-sonnet-4-5-20250929|Claude Sonnet 4.5|anthropic
-claude-haiku-4-5-20251001|Claude Haiku 4.5|anthropic
-gemini-2.5-pro|Gemini 2.5 Pro|google
-gemini-2.5-flash|Gemini 2.5 Flash|google
-```
-
-Format: `id|name|provider` (one model per line)
-
-**Request (JSON response):**
-```bash
-curl -H "Accept: application/json" http://localhost:8080/api/models
 ```
 
 **Response:**
@@ -75,9 +59,24 @@ curl -H "Accept: application/json" http://localhost:8080/api/models
 {
   "models": [
     {"id": "claude-opus-4-6", "name": "Claude Opus 4.6", "provider": "anthropic"},
+    {"id": "claude-sonnet-4-5-20250929", "name": "Claude Sonnet 4.5", "provider": "anthropic"},
     {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "provider": "google"}
   ]
 }
+```
+
+**Request (XML response):**
+```bash
+curl -H "Accept: application/xml" http://localhost:8080/api/models
+```
+
+**Response:**
+```xml
+<?xml version="1.0"?>
+<response>
+  <models><id>claude-opus-4-6</id><name>Claude Opus 4.6</name><provider>anthropic</provider></models>
+  <models><id>claude-sonnet-4-5-20250929</id><name>Claude Sonnet 4.5</name><provider>anthropic</provider></models>
+</response>
 ```
 
 #### POST /api/chat
@@ -91,22 +90,9 @@ Send a prompt to an LLM and receive a response.
 | model | string | Yes | Model ID (e.g., `claude-sonnet-4-5-20250929`) |
 | back_in_time | bool | No | Enable "year 2000" mode (default: false) |
 
-**Request (form-urlencoded, plain text response):**
+**Request (JSON response - default):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
-  -H "Accept: text/plain" \
-  -d "prompt=Hello, who are you?&model=claude-sonnet-4-5-20250929"
-```
-
-**Response:**
-```
-Hello! I'm Claude, an AI assistant made by Anthropic. How can I help you today?
-```
-
-**Request (form-urlencoded, JSON response):**
-```bash
-curl -X POST http://localhost:8080/api/chat \
-  -H "Accept: application/json" \
   -d "prompt=Hello&model=claude-sonnet-4-5-20250929"
 ```
 
@@ -118,18 +104,29 @@ curl -X POST http://localhost:8080/api/chat \
 }
 ```
 
+**Request (XML response):**
+```bash
+curl -X POST http://localhost:8080/api/chat \
+  -H "Accept: application/xml" \
+  -d "prompt=Hello&model=claude-sonnet-4-5-20250929"
+```
+
+**Response:**
+```xml
+<?xml version="1.0"?>
+<response><response>Hello! How can I help you today?</response><model>claude-sonnet-4-5-20250929</model></response>
+```
+
 **Request (JSON input):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
   -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
   -d '{"prompt": "Hello", "model": "claude-sonnet-4-5-20250929", "back_in_time": false}'
 ```
 
 **Request (with "Back in Time" mode):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
-  -H "Accept: text/plain" \
   -d "prompt=What do you think of the iPhone?&model=claude-sonnet-4-5-20250929&back_in_time=1"
 ```
 

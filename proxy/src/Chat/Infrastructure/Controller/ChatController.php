@@ -8,11 +8,15 @@ use App\Chat\Application\Command\SendChatCommand;
 use App\Chat\Application\Command\SendChatCommandHandler;
 use App\Chat\Application\Query\GetModelsQuery;
 use App\Chat\Application\Query\GetModelsQueryHandler;
-use App\Chat\Infrastructure\ValueResolver\ChatRequest;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Chat\Infrastructure\Controller\Response\ChatResponse;
+use App\Chat\Infrastructure\Controller\Response\ErrorResponse;
+use App\Chat\Infrastructure\Controller\Response\ModelItem;
+use App\Chat\Infrastructure\Controller\Response\ModelCollection;
+use App\Chat\Infrastructure\Controller\ValueResolver\ChatRequest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final readonly class ChatController
@@ -21,17 +25,22 @@ final readonly class ChatController
         private SendChatCommandHandler $sendChatHandler,
         private GetModelsQueryHandler $getModelsHandler,
         private ValidatorInterface $validator,
+        private SerializerInterface $serializer,
     ) {
     }
 
     #[Route('/api/chat', name: 'api_chat', methods: ['POST'])]
     public function chat(ChatRequest $chatRequest, Request $request): Response
     {
-        $accept = $request->headers->get('Accept', 'text/plain');
+        $format = $request->getPreferredFormat('json');
 
         $errors = $this->validator->validate($chatRequest);
         if (count($errors) > 0) {
-            return $this->errorResponse((string) $errors->get(0)->getMessage(), $accept, 400);
+            return $this->respond(
+                new ErrorResponse((string)$errors->get(0)->getMessage()),
+                $format,
+                400,
+            );
         }
 
         try {
@@ -43,51 +52,41 @@ final readonly class ChatController
 
             $response = ($this->sendChatHandler)($command);
 
-            if (str_contains($accept, 'application/json')) {
-                return new JsonResponse([
-                    'response' => $response->response,
-                    'model' => $response->model,
-                ]);
-            }
-
-            return new Response($response->response, 200, [
-                'Content-Type' => 'text/plain; charset=utf-8',
-            ]);
+            return $this->respond(
+                new ChatResponse($response->response, $response->model),
+                $format,
+            );
         } catch (\Throwable $e) {
-            return $this->errorResponse($e->getMessage(), $accept, 500);
+            return $this->respond(
+                new ErrorResponse($e->getMessage()),
+                $format,
+                500,
+            );
         }
     }
 
     #[Route('/api/models', name: 'api_models', methods: ['GET'])]
     public function models(Request $request): Response
     {
-        $accept = $request->headers->get('Accept', 'text/plain');
+        $format = $request->getPreferredFormat('json');
         $models = ($this->getModelsHandler)(new GetModelsQuery());
 
-        if (str_contains($accept, 'application/json')) {
-            return new JsonResponse([
-                'models' => array_map(fn($model) => $model->toArray(), $models),
-            ]);
-        }
-
-        $lines = array_map(
-            fn($model) => sprintf('%s|%s|%s', $model->id, $model->name, $model->provider),
-            $models
+        $items = array_map(
+            fn($model) => new ModelItem($model->id, $model->name, $model->provider),
+            $models,
         );
 
-        return new Response(implode("\n", $lines), 200, [
-            'Content-Type' => 'text/plain; charset=utf-8',
-        ]);
+        return $this->respond(new ModelCollection($items), $format);
     }
 
-    private function errorResponse(string $message, string $accept, int $statusCode): Response
+    private function respond(object $data, string $format, int $status = 200): Response
     {
-        if (str_contains($accept, 'application/json')) {
-            return new JsonResponse(['error' => $message], $statusCode);
-        }
+        $mimeTypes = ['json' => 'application/json', 'xml' => 'application/xml'];
 
-        return new Response('Error: ' . $message, $statusCode, [
-            'Content-Type' => 'text/plain; charset=utf-8',
-        ]);
+        return new Response(
+            $this->serializer->serialize($data, $format),
+            $status,
+            ['Content-Type' => $mimeTypes[$format] ?? 'application/json'],
+        );
     }
 }

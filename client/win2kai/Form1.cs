@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Net;
 using System.IO;
+using System.Xml;
 
 namespace win2kai
 {
@@ -30,20 +31,18 @@ namespace win2kai
         {
             try
             {
-                string rawData = HttpGet(API_URL_MODELS);
-                string[] lines = rawData.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                string xml = HttpGet(API_URL_MODELS);
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xml);
 
                 cmbModels.Items.Clear();
 
-                foreach (string line in lines)
+                XmlNodeList modelNodes = doc.SelectNodes("/response/models");
+                foreach (XmlNode node in modelNodes)
                 {
-                    string[] parts = line.Split('|');
-                    if (parts.Length >= 2)
-                    {
-                        string id = parts[0];
-                        string name = parts[1];
-                        cmbModels.Items.Add(new ModelItem(name, id));
-                    }
+                    string id = node.SelectSingleNode("id").InnerText;
+                    string name = node.SelectSingleNode("name").InnerText;
+                    cmbModels.Items.Add(new ModelItem(name, id));
                 }
 
                 if (cmbModels.Items.Count > 0)
@@ -109,8 +108,20 @@ namespace win2kai
                     Uri.EscapeDataString(selectedItem.Id),
                     backInTime);
 
-                string response = HttpPost(API_URL_CHAT, postData);
-                AppendChatMessage("AI (" + selectedItem.Name + ")", response, Color.Black);
+                string xml = HttpPost(API_URL_CHAT, postData);
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xml);
+
+                XmlNode errorNode = doc.SelectSingleNode("/response/error");
+                if (errorNode != null)
+                {
+                    AppendChatMessage("Error", errorNode.InnerText, Color.Red);
+                }
+                else
+                {
+                    string response = doc.SelectSingleNode("/response/response").InnerText;
+                    AppendChatMessage("AI (" + selectedItem.Name + ")", response, Color.Black);
+                }
             }
             catch (Exception ex)
             {
@@ -149,7 +160,8 @@ namespace win2kai
 
         private string HttpGet(string url)
         {
-            WebRequest request = WebRequest.Create(url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Accept = "application/xml";
             using (WebResponse response = request.GetResponse())
             using (StreamReader reader = new StreamReader(response.GetResponseStream()))
             {
@@ -162,7 +174,7 @@ namespace win2kai
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
-            request.Accept = "text/plain";
+            request.Accept = "application/xml";
 
             byte[] byteArray = Encoding.UTF8.GetBytes(postData);
             request.ContentLength = byteArray.Length;

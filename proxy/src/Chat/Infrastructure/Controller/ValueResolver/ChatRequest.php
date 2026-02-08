@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Chat\Infrastructure\ValueResolver;
+namespace App\Chat\Infrastructure\Controller\ValueResolver;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
