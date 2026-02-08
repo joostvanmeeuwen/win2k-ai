@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Chat\Infrastructure\Controller\ValueResolver;
+namespace App\Chat\Infrastructure\Controller\Request;
 
+use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class ChatRequest
@@ -13,7 +14,8 @@ final readonly class ChatRequest
         public string $prompt,
         #[Assert\NotBlank(message: 'Model is required')]
         public string $model,
-        public bool $backInTime,
+        #[SerializedName('back_in_time')]
+        public bool $backInTime = false,
     ) {
     }
 }

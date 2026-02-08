@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Net;
 using System.IO;
+using System.Security;
 using System.Xml;
 
 namespace win2kai
@@ -74,7 +75,6 @@ namespace win2kai
 
             string prompt = txtInput.Text;
             ModelItem selectedItem = (ModelItem)cmbModels.SelectedItem;
-            string backInTime = chkRetro.Checked ? "1" : "0";
 
             rtbChat.SelectionStart = rtbChat.TextLength;
             rtbChat.SelectionLength = 0;
@@ -103,12 +103,7 @@ namespace win2kai
 
             try
             {
-                string postData = string.Format("prompt={0}&model={1}&back_in_time={2}",
-                    Uri.EscapeDataString(prompt),
-                    Uri.EscapeDataString(selectedItem.Id),
-                    backInTime);
-
-                string xml = HttpPost(API_URL_CHAT, postData);
+                string xml = HttpPost(API_URL_CHAT, prompt, selectedItem.Id, chkRetro.Checked);
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(xml);
 
@@ -169,14 +164,20 @@ namespace win2kai
             }
         }
 
-        private string HttpPost(string url, string postData)
+        private string HttpPost(string url, string prompt, string model, bool backInTime)
         {
+            string xml = string.Format(
+                "<?xml version=\"1.0\"?><request><prompt>{0}</prompt><model>{1}</model><back_in_time>{2}</back_in_time></request>",
+                SecurityElement.Escape(prompt),
+                SecurityElement.Escape(model),
+                backInTime ? "true" : "false");
+
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentType = "application/xml";
             request.Accept = "application/xml";
 
-            byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+            byte[] byteArray = Encoding.UTF8.GetBytes(xml);
             request.ContentLength = byteArray.Length;
 
             using (Stream dataStream = request.GetRequestStream())

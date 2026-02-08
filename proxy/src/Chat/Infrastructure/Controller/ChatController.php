@@ -12,36 +12,26 @@ use App\Chat\Infrastructure\Controller\Response\ChatResponse;
 use App\Chat\Infrastructure\Controller\Response\ErrorResponse;
 use App\Chat\Infrastructure\Controller\Response\ModelItem;
 use App\Chat\Infrastructure\Controller\Response\ModelCollection;
-use App\Chat\Infrastructure\Controller\ValueResolver\ChatRequest;
+use App\Chat\Infrastructure\Controller\Request\ChatRequest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final readonly class ChatController
 {
     public function __construct(
         private SendChatCommandHandler $sendChatHandler,
         private GetModelsQueryHandler $getModelsHandler,
-        private ValidatorInterface $validator,
         private SerializerInterface $serializer,
     ) {
     }
 
     #[Route('/api/chat', name: 'api_chat', methods: ['POST'])]
-    public function chat(ChatRequest $chatRequest, Request $request): Response
+    public function chat(#[MapRequestPayload] ChatRequest $chatRequest, Request $request): Response
     {
         $format = $request->getPreferredFormat('json');
-
-        $errors = $this->validator->validate($chatRequest);
-        if (count($errors) > 0) {
-            return $this->respond(
-                new ErrorResponse((string)$errors->get(0)->getMessage()),
-                $format,
-                400,
-            );
-        }
 
         try {
             $command = new SendChatCommand(

@@ -83,17 +83,18 @@ curl -H "Accept: application/xml" http://localhost:8080/api/models
 
 Send a prompt to an LLM and receive a response.
 
-**Parameters (form-urlencoded or JSON):**
+**Parameters (JSON or XML):**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | prompt | string | Yes | The user's message |
 | model | string | Yes | Model ID (e.g., `claude-sonnet-4-5-20250929`) |
 | back_in_time | bool | No | Enable "year 2000" mode (default: false) |
 
-**Request (JSON response - default):**
+**Request (JSON in, JSON out - default):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
-  -d "prompt=Hello&model=claude-sonnet-4-5-20250929"
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Hello", "model": "claude-sonnet-4-5-20250929", "back_in_time": false}'
 ```
 
 **Response:**
@@ -104,11 +105,12 @@ curl -X POST http://localhost:8080/api/chat \
 }
 ```
 
-**Request (XML response):**
+**Request (XML in, XML out):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/xml" \
   -H "Accept: application/xml" \
-  -d "prompt=Hello&model=claude-sonnet-4-5-20250929"
+  -d '<?xml version="1.0"?><request><prompt>Hello</prompt><model>claude-sonnet-4-5-20250929</model><back_in_time>false</back_in_time></request>'
 ```
 
 **Response:**
@@ -117,20 +119,15 @@ curl -X POST http://localhost:8080/api/chat \
 <response><response>Hello! How can I help you today?</response><model>claude-sonnet-4-5-20250929</model></response>
 ```
 
-**Request (JSON input):**
-```bash
-curl -X POST http://localhost:8080/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Hello", "model": "claude-sonnet-4-5-20250929", "back_in_time": false}'
-```
-
 **Request (with "Back in Time" mode):**
 ```bash
 curl -X POST http://localhost:8080/api/chat \
-  -d "prompt=What do you think of the iPhone?&model=claude-sonnet-4-5-20250929&back_in_time=1"
+  -H "Content-Type: application/xml" \
+  -H "Accept: application/xml" \
+  -d '<?xml version="1.0"?><request><prompt>What do you think of the iPhone?</prompt><model>claude-sonnet-4-5-20250929</model><back_in_time>true</back_in_time></request>'
 ```
 
-When `back_in_time=1`, the LLM will roleplay as if it's the year 2000, with no knowledge of events or technology after December 31, 2000.
+When `back_in_time` is enabled, the LLM will roleplay as if it's the year 2000, with no knowledge of events or technology after December 31, 2000.
 
 ### Available Models
 
